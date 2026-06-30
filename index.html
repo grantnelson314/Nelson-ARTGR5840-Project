@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SubTrack — Subscription Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              DEFAULT: '#2563EB',
+              hover: '#1D4ED8',
+              surface: '#EFF6FF',
+            },
+            secondary: '#64748B',
+            muted: '#475569',
+            success: {
+              DEFAULT: '#22C55E',
+              surface: '#F0FDF4',
+              text: '#166534',
+            },
+            warning: {
+              DEFAULT: '#F59E0B',
+              surface: '#FFFBEB',
+              text: '#92400E',
+            },
+            page: '#F8FAFC',
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    };
+  </script>
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body class="bg-page font-sans text-slate-900 antialiased">
+
+  <!-- Mobile Header -->
+  <header class="mobile-header lg:hidden sticky top-0 z-40 bg-white border-b border-slate-200 px-4 flex items-center justify-between">
+    <h1 class="text-xl font-bold text-slate-900" id="mobile-header-title">Dashboard</h1>
+    <button type="button" id="mobile-add-btn" class="btn-primary mobile-fab flex items-center justify-center rounded-full" aria-label="Add subscription">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+      </svg>
+    </button>
+  </header>
+
+  <div class="flex min-h-screen">
+
+    <!-- Desktop Sidebar -->
+    <aside class="hidden lg:flex lg:flex-col lg:w-60 lg:fixed lg:inset-y-0 bg-white border-r border-slate-200 z-30">
+      <div class="px-6 py-6 border-b border-slate-200">
+        <h1 class="text-xl font-bold text-slate-900">SubTrack</h1>
+        <p class="text-xs text-muted mt-0.5">Subscription Tracker</p>
+      </div>
+      <nav class="flex-1 px-3 py-4 space-y-1" aria-label="Main navigation">
+        <button type="button" data-screen="dashboard" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+          Dashboard
+        </button>
+        <button type="button" data-screen="subscriptions" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+          My Subscriptions
+        </button>
+        <button type="button" data-screen="analytics" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+          Analytics
+        </button>
+        <button type="button" data-screen="renewals" class="nav-item w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+          Renewals
+        </button>
+      </nav>
+      <div class="px-4 py-4 border-t border-slate-200">
+        <button type="button" id="desktop-add-btn" class="btn-primary w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+          Add Subscription
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 lg:ml-60 pb-20 lg:pb-8 mobile-main">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8 mobile-content">
+
+        <!-- Dashboard Screen -->
+        <section id="screen-dashboard" class="screen dash-page">
+          <div class="hidden lg:flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-slate-900">Dashboard</h2>
+            <button type="button" class="desktop-header-add btn-primary flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add Subscription
+            </button>
+          </div>
+
+          <!-- Spending Hero -->
+          <div id="sectionSpendingHero" class="dash-hero relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary via-blue-600 to-blue-800 p-6 sm:p-8 mb-5 shadow-lg shadow-blue-600/20">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"></div>
+
+            <div class="relative flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
+              <div class="flex-1">
+                <p class="dash-hero-label text-xs sm:text-sm font-semibold uppercase tracking-wider">Total Monthly Spend</p>
+                <div class="flex items-baseline gap-2 mt-1">
+                  <p id="dash-monthly-total" class="text-5xl sm:text-6xl lg:text-7xl font-bold text-white tracking-tight leading-none">$0.00</p>
+                  <span class="dash-hero-muted text-lg font-medium">/mo</span>
+                </div>
+                <p id="dash-daily-equiv" class="dash-hero-muted text-sm mt-3"></p>
+              </div>
+
+              <div class="dash-hero-stats flex flex-col sm:flex-row flex-wrap gap-3 sm:gap-4">
+                <div class="dash-hero-stat flex-1 min-w-0 sm:min-w-[120px] bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-white/15">
+                  <p class="dash-hero-label text-xs font-semibold uppercase tracking-wide">Yearly</p>
+                  <p id="dash-yearly-total" class="text-2xl sm:text-3xl font-bold text-white mt-0.5 tracking-tight">$0.00</p>
+                  <p class="dash-hero-muted text-xs mt-0.5">projected</p>
+                </div>
+                <div class="dash-hero-stat flex-1 min-w-0 sm:min-w-[100px] bg-white/10 backdrop-blur-sm rounded-xl px-4 py-3.5 border border-white/15">
+                  <p class="dash-hero-label text-xs font-semibold uppercase tracking-wide">Active</p>
+                  <p id="dash-active-count-num" class="text-2xl sm:text-3xl font-bold text-white mt-0.5">0</p>
+                  <p id="dash-active-count" class="dash-hero-muted text-xs mt-0.5">subscriptions</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Supporting Metrics -->
+          <div id="sectionSupportingMetrics" class="mobile-metrics-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-8 h-8 rounded-lg bg-primary-surface flex items-center justify-center text-primary">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                </span>
+                <p class="dash-label">Avg / Service</p>
+              </div>
+              <p id="dash-avg-per-service" class="text-xl sm:text-2xl font-bold text-slate-900">$0.00</p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-8 h-8 rounded-lg bg-warning-surface flex items-center justify-center text-warning">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </span>
+                <p class="dash-label">This Week</p>
+              </div>
+              <p id="dash-renewals-week" class="text-xl sm:text-2xl font-bold text-slate-900">0</p>
+              <p class="text-sm dash-muted mt-0.5">renewals due</p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-8 h-8 rounded-lg bg-success-surface flex items-center justify-center text-success">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                </span>
+                <p class="dash-label">Top Category</p>
+              </div>
+              <p id="dash-top-category" class="text-xl sm:text-2xl font-bold text-slate-900 truncate">—</p>
+              <p id="dash-top-category-amount" class="text-sm dash-muted mt-0.5">$0.00/mo</p>
+            </div>
+            <div class="bg-white rounded-xl border border-slate-200 p-4 shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                <span class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-muted">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </span>
+                <p class="dash-label">Next Renewal</p>
+              </div>
+              <p id="dash-next-renewal-name" class="text-base sm:text-lg font-bold text-slate-900 truncate">—</p>
+              <p id="dash-next-renewal-date" class="text-sm dash-muted mt-0.5">No upcoming</p>
+            </div>
+          </div>
+
+          <!-- Category Breakdown -->
+          <div id="sectionCategoryBreakdown" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6 hidden">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-base font-bold text-slate-900">Spending by Category</h3>
+              <button type="button" data-goto="analytics" class="link-primary text-sm transition-colors">Full analytics →</button>
+            </div>
+            <div id="dash-category-bars" class="space-y-3"></div>
+          </div>
+
+          <!-- Content Grid -->
+          <div class="mobile-stack-grid grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+            <!-- Upcoming Renewals -->
+            <div id="sectionUpcomingRenewals" class="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-1">
+                <h3 class="text-base font-bold text-slate-900">Upcoming Renewals</h3>
+                <button type="button" data-goto="renewals" class="link-primary text-sm transition-colors">View all →</button>
+              </div>
+              <p class="text-sm dash-muted mb-4">Next 30 days</p>
+              <div id="dash-upcoming-list" class="divide-y divide-slate-100"></div>
+            </div>
+
+            <!-- Recent Subscriptions -->
+            <div id="sectionRecentSubscriptions" class="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="text-base font-bold text-slate-900">Recent Subscriptions</h3>
+                <button type="button" data-goto="subscriptions" class="link-primary text-sm transition-colors">View all →</button>
+              </div>
+              <div id="dash-recent-list" class="mobile-card-stack grid grid-cols-1 gap-3"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- My Subscriptions Screen -->
+        <section id="screen-subscriptions" class="screen hidden">
+          <div class="hidden lg:flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-slate-900">My Subscriptions</h2>
+            <button type="button" class="desktop-header-add btn-primary flex items-center gap-2 px-4 py-2.5 text-sm rounded-lg">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+              Add Subscription
+            </button>
+          </div>
+
+          <!-- Search & Filters -->
+          <div id="sectionSubscriptionFilters" class="mobile-filter-bar bg-white rounded-xl border border-slate-200 p-4 shadow-sm mb-4 sm:mb-6 space-y-3">
+            <div class="relative">
+              <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+              <input type="search" id="search-input" placeholder="Search subscriptions..." class="field-input pl-10" aria-label="Search subscriptions">
+            </div>
+            <div class="mobile-filter-row flex flex-col sm:flex-row sm:flex-wrap gap-3">
+              <select id="filter-category" class="field-input flex-1 min-w-[140px]" aria-label="Filter by category">
+                <option value="all">All categories</option>
+                <option value="streaming">Streaming</option>
+                <option value="software">Software</option>
+                <option value="music">Music</option>
+                <option value="fitness">Fitness</option>
+                <option value="news">News</option>
+                <option value="other">Other</option>
+              </select>
+              <select id="filter-status" class="field-input flex-1 min-w-[140px]" aria-label="Filter by status">
+                <option value="all">All statuses</option>
+                <option value="active">Active</option>
+                <option value="paused">Paused</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+              <select id="filter-sort" class="field-input flex-1 min-w-[140px]" aria-label="Sort subscriptions">
+                <option value="renewal">Sort: Renewal date</option>
+                <option value="cost-desc">Sort: Cost (high to low)</option>
+                <option value="name">Sort: Name A–Z</option>
+              </select>
+            </div>
+          </div>
+
+          <p id="subscriptions-summary" class="text-sm text-muted mb-3" aria-live="polite"></p>
+          <div id="sectionSubscriptionList" class="mobile-card-stack space-y-3">
+            <div id="subscriptions-list" class="space-y-3"></div>
+          </div>
+        </section>
+
+        <!-- Analytics Screen -->
+        <section id="screen-analytics" class="screen hidden">
+          <h2 class="hidden lg:block text-2xl font-bold text-slate-900 mb-8">Analytics</h2>
+
+          <div class="flex flex-wrap items-center gap-3 mb-2">
+            <select id="analytics-period" class="field-input w-auto" aria-label="Analytics period">
+              <option value="6">Last 6 months</option>
+              <option value="12" selected>Last 12 months</option>
+            </select>
+          </div>
+          <p class="text-sm text-muted mb-6">Based on active subscriptions</p>
+
+          <div id="analytics-empty-notice" class="hidden bg-primary-surface border border-blue-100 rounded-xl p-4 mb-6">
+            <p class="text-sm font-medium text-slate-900">No active subscriptions yet</p>
+            <p class="text-sm text-muted mt-1">Add or resume subscriptions to see spending charts and summaries.</p>
+          </div>
+
+          <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm mb-6">
+            <p class="text-sm font-medium text-label">Average Monthly Spend</p>
+            <p id="analytics-avg-monthly" class="text-3xl font-bold text-slate-900 mt-1">$0.00</p>
+          </div>
+
+          <div class="mobile-stack-grid grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6 mb-4 lg:mb-6">
+            <div id="sectionSpendingOverTime" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <h3 class="text-lg font-bold text-slate-900 mb-4">Spending Over Time</h3>
+              <div class="chart-container">
+                <canvas id="chart-spending" aria-label="Spending over time chart"></canvas>
+                <div id="chart-spending-empty" class="chart-empty-overlay hidden">
+                  <p class="text-sm font-medium text-slate-700">No spending data yet</p>
+                  <p class="text-xs text-muted mt-1">Active subscriptions will appear here</p>
+                </div>
+              </div>
+            </div>
+            <div id="sectionCategoryChart" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <h3 class="text-lg font-bold text-slate-900 mb-4">By Category</h3>
+              <div class="chart-container">
+                <canvas id="chart-category" aria-label="Category breakdown chart"></canvas>
+                <div id="chart-category-empty" class="chart-empty-overlay hidden">
+                  <p class="text-sm font-medium text-slate-700">No category data yet</p>
+                  <p class="text-xs text-muted mt-1">Add active subscriptions to see breakdown</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="sectionMonthlySummary" class="mobile-summary-grid grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <p class="text-sm font-medium text-label">Monthly Summary</p>
+              <p id="analytics-monthly-summary" class="text-2xl font-bold text-slate-900 mt-1">$0.00</p>
+              <p id="analytics-monthly-subs" class="text-sm text-muted mt-1">0 subscriptions</p>
+            </div>
+            <div id="sectionYearlySummary" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <p class="text-sm font-medium text-label">Yearly Summary</p>
+              <p id="analytics-yearly-summary" class="text-2xl font-bold text-slate-900 mt-1">$0.00</p>
+              <p id="analytics-yearly-note" class="text-sm text-muted mt-1">Projected annual spend</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Renewals Screen -->
+        <section id="screen-renewals" class="screen hidden">
+          <div class="hidden lg:flex items-center justify-between mb-8">
+            <h2 class="text-2xl font-bold text-slate-900">Renewals</h2>
+          </div>
+
+          <div class="mobile-stack-grid grid grid-cols-1 lg:grid-cols-5 gap-4 lg:gap-6">
+            <!-- Calendar -->
+            <div id="sectionRenewalCalendar" class="lg:col-span-3 bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <button type="button" id="cal-prev" class="icon-btn" aria-label="Previous month">
+                  <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h3 id="cal-month-label" class="text-lg font-bold text-slate-900"></h3>
+                <button type="button" id="cal-next" class="icon-btn" aria-label="Next month">
+                  <svg class="w-5 h-5 text-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+              <div class="grid grid-cols-7 gap-1 mb-2">
+                <div class="text-center text-xs font-semibold text-muted py-1">Sun</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Mon</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Tue</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Wed</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Thu</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Fri</div>
+                <div class="text-center text-xs font-semibold text-muted py-1">Sat</div>
+              </div>
+              <div id="cal-grid" class="grid grid-cols-7 gap-1"></div>
+              <div id="cal-day-detail" class="mt-4 pt-4 border-t border-slate-200 hidden">
+                <p id="cal-day-detail-label" class="text-sm font-medium text-label mb-2"></p>
+                <div id="cal-day-detail-list" class="space-y-2"></div>
+              </div>
+            </div>
+
+            <!-- Timeline & Reminders -->
+            <div class="lg:col-span-2 space-y-6">
+              <div id="sectionRenewalTimeline" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Renewal Timeline</h3>
+                <div id="renewal-timeline" class="space-y-3"></div>
+              </div>
+              <div id="sectionReminderSettings" class="bg-white rounded-xl border border-slate-200 p-5 shadow-sm">
+                <h3 class="text-lg font-bold text-slate-900 mb-1">Reminder Settings</h3>
+                <p class="text-sm text-muted mb-4">Saved as preferences — notifications are not sent in this version.</p>
+                <div class="space-y-3">
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="reminder-3" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" checked>
+                    <span class="text-sm text-slate-700">3 days before renewal</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="reminder-1" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary" checked>
+                    <span class="text-sm text-slate-700">1 day before renewal</span>
+                  </label>
+                  <label class="flex items-center gap-3 cursor-pointer">
+                    <input type="checkbox" id="reminder-0" class="w-4 h-4 rounded border-slate-300 text-primary focus:ring-primary">
+                    <span class="text-sm text-slate-700">Day of renewal</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Add Subscription Screen -->
+        <section id="screen-add" class="screen hidden">
+          <div class="max-w-lg mx-auto">
+            <button type="button" id="add-back-btn" class="back-link mb-6">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              Back
+            </button>
+            <h2 id="add-form-title" class="text-2xl font-bold text-slate-900 mb-6">Add Subscription</h2>
+
+            <form id="add-form" data-section="sectionSubscriptionForm" class="add-form section-subscription-form bg-white rounded-xl border border-slate-200 p-5 sm:p-8 shadow-sm" novalidate>
+              <input type="hidden" id="edit-id" value="">
+
+              <div class="form-field">
+                <label for="input-name" class="form-label">Service name</label>
+                <input type="text" id="input-name" placeholder="e.g. Netflix, Spotify, Adobe Creative Cloud" class="form-input" required minlength="2" maxlength="80">
+                <p id="error-name" class="form-error hidden" role="alert"></p>
+              </div>
+
+              <div class="form-field">
+                <label for="input-category" class="form-label">Category</label>
+                <select id="input-category" class="form-select" required>
+                  <option value="">Select a category</option>
+                  <option value="streaming">Streaming</option>
+                  <option value="software">Software</option>
+                  <option value="music">Music</option>
+                  <option value="fitness">Fitness</option>
+                  <option value="news">News</option>
+                  <option value="other">Other</option>
+                </select>
+                <p id="error-category" class="form-error hidden" role="alert"></p>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label for="input-cost" class="form-label">Cost</label>
+                  <div class="form-input-prefix-wrap">
+                    <span class="form-input-prefix" aria-hidden="true">$</span>
+                    <input type="number" id="input-cost" placeholder="0.00" step="0.01" min="0.01" class="form-input form-input--prefix" required>
+                  </div>
+                  <p id="error-cost" class="form-error hidden" role="alert"></p>
+                </div>
+                <div class="form-field">
+                  <label for="input-cycle" class="form-label">Billing cycle</label>
+                  <select id="input-cycle" class="form-select" required>
+                    <option value="monthly">Monthly</option>
+                    <option value="yearly">Yearly</option>
+                    <option value="weekly">Weekly</option>
+                    <option value="quarterly">Quarterly</option>
+                  </select>
+                  <p id="error-cycle" class="form-error hidden" role="alert"></p>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label for="input-renewal" class="form-label">Renewal date</label>
+                <input type="date" id="input-renewal" class="form-input form-input--date" required>
+                <p id="error-renewal" class="form-error hidden" role="alert"></p>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" id="add-cancel-btn" class="form-btn form-btn-secondary">Cancel</button>
+                <button type="submit" id="add-submit-btn" class="form-btn form-btn-primary">Save Subscription</button>
+              </div>
+            </form>
+          </div>
+        </section>
+
+        <!-- Subscription Detail Screen -->
+        <section id="screen-detail" class="screen hidden">
+          <div class="max-w-lg mx-auto">
+            <button type="button" id="detail-back-btn" class="back-link mb-6">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+              Back
+            </button>
+
+            <div id="sectionSubscriptionDetails" class="bg-white rounded-xl border border-slate-200 p-5 sm:p-6 shadow-sm">
+              <div class="flex items-start gap-4 mb-6">
+                <div id="detail-icon" class="flex-shrink-0 w-14 h-14 rounded-xl bg-primary-surface flex items-center justify-center text-primary text-xl font-bold"></div>
+                <div class="flex-1 min-w-0">
+                  <h2 id="detail-name" class="text-xl font-bold text-slate-900 truncate"></h2>
+                  <p id="detail-category" class="text-sm text-muted mt-0.5"></p>
+                  <span id="detail-status" class="inline-flex items-center gap-1.5 mt-2 text-xs font-medium px-2.5 py-1 rounded-full"></span>
+                </div>
+              </div>
+
+              <dl class="space-y-4 mb-6">
+                <div class="flex justify-between gap-4">
+                  <dt class="text-sm text-label">Cost</dt>
+                  <dd id="detail-cost" class="text-sm font-semibold text-slate-900 text-right"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <dt class="text-sm text-label">Billing cycle</dt>
+                  <dd id="detail-cycle" class="text-sm font-semibold text-slate-900 text-right"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <dt class="text-sm text-label">Monthly equivalent</dt>
+                  <dd id="detail-monthly" class="text-sm font-semibold text-slate-900 text-right"></dd>
+                </div>
+                <div class="flex justify-between gap-4">
+                  <dt class="text-sm text-label">Next renewal</dt>
+                  <dd id="detail-renewal" class="text-sm font-semibold text-slate-900 text-right"></dd>
+                </div>
+              </dl>
+
+              <div class="flex flex-col sm:flex-row gap-3">
+                <button type="button" id="detail-edit-btn" class="btn-primary flex-1 px-4 py-2.5 text-sm rounded-lg">Edit</button>
+                <button type="button" id="detail-pause-btn" class="btn-secondary flex-1 px-4 py-2.5 text-sm rounded-lg">Pause</button>
+                <button type="button" id="detail-delete-btn" class="btn-destructive flex-1 px-4 py-2.5 text-sm rounded-lg">Delete</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </main>
+  </div>
+
+  <!-- Mobile Bottom Navigation -->
+  <nav class="mobile-bottom-nav lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white border-t border-slate-200" aria-label="Mobile navigation">
+    <div class="mobile-bottom-nav-inner flex items-center justify-around">
+      <button type="button" data-screen="dashboard" class="mobile-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Home
+      </button>
+      <button type="button" data-screen="subscriptions" class="mobile-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/></svg>
+        Subs
+      </button>
+      <button type="button" data-screen="analytics" class="mobile-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Stats
+      </button>
+      <button type="button" data-screen="renewals" class="mobile-nav-item flex flex-col items-center justify-center gap-1 px-3 py-2 text-xs font-medium">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        Renew
+      </button>
+    </div>
+  </nav>
+
+  <!-- Toast -->
+  <div id="toast" class="fixed bottom-24 lg:bottom-8 left-1/2 -translate-x-1/2 z-50 px-4 py-2.5 bg-slate-900 text-white text-sm font-medium rounded-lg shadow-lg opacity-0 pointer-events-none transition-opacity duration-300" role="status" aria-live="polite"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

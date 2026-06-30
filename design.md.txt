@@ -1,0 +1,169 @@
+# DESIGN.md
+
+## Project Overview
+
+Implementation guide for consistent UI generation. Build the screens from the **scemantic** tokens and rules below. When a value isn’t specified here, derive it from the nearest token rather than inventing one.
+
+---
+
+## Brand Personality
+* Students managing streaming subscriptions
+* Professionals tracking software memberships
+* Individuals wanting better visibility into recurring expenses
+
+---
+
+## Design Goals
+
+* Clean and modern interface
+* Fast access to important subscription information
+* Clear data visualization
+* Mobile-first responsive design
+* Minimal learning curve
+
+---
+
+## Visual Style
+
+### Inspiration
+
+The visual style is inspired by modern SaaS dashboards such as Rocket Money, Monarch Money, Stripe Dashboard, and Notion.
+
+### Color Palette
+
+Primary Color:
+
+* Blue (#2563EB)
+
+Secondary Color:
+
+* Slate Gray (#64748B)
+
+Success Color:
+
+* Green (#22C55E)
+
+Warning Color:
+
+* Orange (#F59E0B)
+
+Background:
+
+* Light Gray (#F8FAFC)
+
+Primary Surface (derived from Primary):
+
+* Light Blue (#EFF6FF) — tinted backgrounds, dashboard gradient midpoint
+
+### Typography
+
+Primary Font:
+
+* Inter
+
+Heading Style:
+
+* Bold
+
+Body Style:
+
+* Regular
+
+---
+
+## Core Screens
+
+### Dashboard
+
+Purpose:
+Provide a quick overview of subscription spending and upcoming renewals.
+
+Page Background:
+
+* Dashboard uses a subtle gradient background (`.dash-page`) — exclusive to this screen
+* Linear gradient: Background (#F8FAFC) → Dashboard tint (#DBEAFE) → Background (#F8FAFC) at 165°
+* Soft radial accents using Primary (#2563EB) at 8–11% opacity in the top-right and bottom-left corners
+* Rounded container (1rem) that extends edge-to-edge within the main content area
+
+Contrast Rules:
+
+* All data cards and widgets remain solid white (#FFFFFF) — text stays on white surfaces
+* Page-level headings use dark slate text (#0F172A / slate-900) on the light gradient
+* The spending hero card uses a separate, stronger blue gradient (Primary → blue-800) with white text
+
+Key Components:
+
+* Monthly spending card (hero)
+* Yearly spending card (hero)
+* Upcoming renewals widget
+* Recent subscriptions list
+* Add subscription button
+
+### My Subscriptions
+
+Purpose:
+Manage active subscriptions.
+
+Key Components:
+
+* Search bar
+* Filter dropdown
+* Subscription cards
+* Status indicators
+
+### Add Subscription
+
+Purpose:
+Create new subscriptions.
+
+Key Components:
+
+* Service name input
+* Category dropdown
+* Cost input
+* Billing cycle selector
+* Renewal date picker
+
+### Analytics
+
+Purpose:
+Visualize subscription spending.
+
+Key Components:
+
+* Spending charts
+* Category breakdown
+* Monthly and yearly summaries
+
+### Renewals
+
+Purpose:
+Track upcoming subscription charges.
+
+Key Components:
+
+* Calendar view
+* Reminder settings
+* Renewal timeline
+
+---
+
+## User Experience Principles
+
+* Minimize clicks for common actions
+* Maintain consistent navigation
+* Use clear visual hierarchy
+* Prioritize spending and renewal information
+* Support desktop and mobile layouts
+
+---
+
+## Technical Direction
+
+* Responsive web application
+* Dashboard-centered navigation
+* Card-based layouts
+* Subtle gradient background on the Dashboard screen only
+* Chart-driven analytics
+* Accessible color contrast
+* Mobile-first design approach
